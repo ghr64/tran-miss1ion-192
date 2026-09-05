@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  tran-miss1ion:
+    build: .
+    container_name: tran-miss1ion-192
+    restart: unless-stopped
+    ports:
+      # Transmission
+      - "9091:9091"           # Web UI
+      - "51413:51413"         # Peer port (TCP)
+      - "51413:51413/udp"     # Peer port (UDP)
+      # SeaweedFS
+      - "8888:8888"           # Filer Web UI / Browser
+      - "8000:8000"           # S3 API
+      - "9333:9333"           # Master UI
+    volumes:
+      - ./data:/data
+      - ./config:/config
+    environment:
+      - SEAWEEDFS_FILER_URL=http://localhost:8888
+      - SEAWEEDFS_DEST_PATH=/downloads
