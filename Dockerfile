@@ -1,18 +1,17 @@
 FROM alpine:3.19
 
-# Install Transmission, curl (for upload hook), supervisor (to run both services), and bash
-RUN apk add --no-cache \
-    transmission-daemon \
-    transmission-cli \
-    curl \
-    supervisor \
-    bash \
-    jq
+# --- OFFLINE BUILD: all dependencies are pre-baked ---
+# No network needed during docker build.
 
-# Install SeaweedFS
-ENV WEED_VERSION=3.70
-RUN wget "https://github.com/seaweedfs/seaweedfs/releases/download/${WEED_VERSION}/linux_amd64.tar.gz" -O /tmp/weed.tar.gz && \
-    tar -xzf /tmp/weed.tar.gz -C /usr/bin/ weed && \
+# Install APK packages from local cache (no internet required)
+COPY apk-cache/ /tmp/apk-cache/
+RUN apk add --no-network --allow-untrusted --no-cache /tmp/apk-cache/*.apk && \
+    rm -rf /tmp/apk-cache
+
+# Install SeaweedFS from local binary
+COPY bin/weed.tar.gz /tmp/weed.tar.gz
+RUN tar -xzf /tmp/weed.tar.gz -C /usr/bin/ weed && \
+    chmod +x /usr/bin/weed && \
     rm /tmp/weed.tar.gz
 
 # Create directories
@@ -27,12 +26,11 @@ COPY scripts/torrent-done.sh /scripts/torrent-done.sh
 RUN chmod +x /scripts/entrypoint.sh /scripts/torrent-done.sh
 
 # Ports:
-# 9091: Transmission Web UI
-# 51413/tcp, 51413/udp: Transmission Peer
-# 8888: SeaweedFS Filer Web UI
+# 9091: Transmission Web UI + RPC
+# 51413/tcp+udp: Transmission Peer
+# 8888: SeaweedFS Filer (file browser)
 # 8000: SeaweedFS S3
-# 9333: SeaweedFS Master
-# 8080: SeaweedFS Volume
-EXPOSE 9091 51413/tcp 51413/udp 8888 8000 9333 8080
+# 9333: SeaweedFS Master UI
+EXPOSE 9091 51413/tcp 51413/udp 8888 8000 9333
 
 ENTRYPOINT ["/scripts/entrypoint.sh"]
