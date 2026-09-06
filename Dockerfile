@@ -22,6 +22,13 @@ COPY config/supervisord.conf /etc/supervisord.conf
 COPY config/settings.json /config/settings.json
 COPY scripts/entrypoint.sh /scripts/entrypoint.sh
 COPY scripts/torrent-done.sh /scripts/torrent-done.sh
+COPY .env /config/.env
+
+# Default environment variables for Runflare (can be overridden)
+ENV SEAWEEDFS_FILER_URL=http://localhost:8888 \
+    SEAWEEDFS_DEST_PATH=/downloads \
+    UPLOAD_MODE=tarzst \
+    PACK_SINGLE_FILES=true
 
 RUN chmod +x /scripts/entrypoint.sh /scripts/torrent-done.sh
 

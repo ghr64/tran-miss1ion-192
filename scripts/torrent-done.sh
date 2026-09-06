@@ -4,6 +4,14 @@
 #   TR_TORRENT_DIR  — directory where files were downloaded
 #   TR_TORRENT_NAME — torrent name (top-level file or folder)
 
+# Source .env if present (needed on Runflare where compose isn't used)
+if [ -f /config/.env ]; then
+    set -a
+    # shellcheck disable=SC1091
+    . /config/.env
+    set +a
+fi
+
 FILER_URL="${SEAWEEDFS_FILER_URL:-http://localhost:8888}"
 DEST_PATH="${SEAWEEDFS_DEST_PATH:-/downloads}"
 MODE="${UPLOAD_MODE:-files}" # files, zip, tarzst
