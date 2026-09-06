@@ -37,7 +37,11 @@ upload_single_file() {
     encoded_path=$(urlencode_path "$remote_path")
 
     echo "[torrent-done] Uploading: $local_file -> ${FILER_URL}${encoded_path}" >&2
+    
+    # Increase max time to 1 hour, connect timeout to 30s.
     http_status=$(curl -s -o /dev/null -w "%{http_code}" \
+        --connect-timeout 30 \
+        --max-time 3600 \
         -X PUT \
         "${FILER_URL}${encoded_path}" \
         -T "$local_file")
@@ -74,7 +78,7 @@ pack_and_upload() {
     if [ "$ext" = "zip" ]; then
         zip -r -q "$archive_path" "$TR_TORRENT_NAME"
     elif [ "$ext" = "tar.zst" ]; then
-        tar -c "$TR_TORRENT_NAME" | zstd -T0 -3 > "$archive_path"
+        tar -c "$TR_TORRENT_NAME" | zstd -T2 -1 > "$archive_path"
     else
         echo "[torrent-done] Unknown archive format: $ext"
         return 1
