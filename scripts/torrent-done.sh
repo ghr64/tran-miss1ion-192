@@ -7,6 +7,7 @@
 FILER_URL="${SEAWEEDFS_FILER_URL:-http://localhost:8888}"
 DEST_PATH="${SEAWEEDFS_DEST_PATH:-/downloads}"
 MODE="${UPLOAD_MODE:-files}" # files, zip, tarzst
+PACK_SINGLE="${PACK_SINGLE_FILES:-false}" # true = pack even single files
 
 SOURCE="${TR_TORRENT_DIR}/${TR_TORRENT_NAME}"
 
@@ -87,13 +88,16 @@ if [ ! -e "$SOURCE" ]; then
 fi
 
 if [ -f "$SOURCE" ]; then
-    # Single file torrents skip zipping
-    status=$(upload_single_file "$SOURCE" "$TR_TORRENT_NAME")
-    if [ "$status" = "201" ] || [ "$status" = "200" ]; then
-        echo "[torrent-done] Upload OK, removing local: $SOURCE"
-        rm -f "$SOURCE"
+    if [ "$PACK_SINGLE" = "true" ] && [ "$MODE" != "files" ]; then
+        pack_and_upload "$( [ "$MODE" = "zip" ] && echo zip || echo tar.zst )"
     else
-        echo "[torrent-done] Upload FAILED (HTTP $status), keeping local: $SOURCE"
+        status=$(upload_single_file "$SOURCE" "$TR_TORRENT_NAME")
+        if [ "$status" = "201" ] || [ "$status" = "200" ]; then
+            echo "[torrent-done] Upload OK, removing local: $SOURCE"
+            rm -f "$SOURCE"
+        else
+            echo "[torrent-done] Upload FAILED (HTTP $status), keeping local: $SOURCE"
+        fi
     fi
 elif [ -d "$SOURCE" ]; then
     if [ "$MODE" = "zip" ]; then
