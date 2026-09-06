@@ -28,12 +28,12 @@ upload_single_file() {
     local encoded_path
     encoded_path=$(urlencode_path "$remote_path")
 
-    echo "[torrent-done] Uploading: $local_file -> ${FILER_URL}${encoded_path}"
+    echo "[torrent-done] Uploading: $local_file -> ${FILER_URL}${encoded_path}" >&2
     http_status=$(curl -s -o /dev/null -w "%{http_code}" \
         -X PUT \
         "${FILER_URL}${encoded_path}" \
         -T "$local_file")
-    echo "[torrent-done] HTTP status: $http_status"
+    echo "[torrent-done] HTTP status: $http_status" >&2
     echo "$http_status"
 }
 
