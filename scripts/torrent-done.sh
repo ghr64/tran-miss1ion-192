@@ -78,7 +78,7 @@ pack_and_upload() {
     if [ "$ext" = "zip" ]; then
         zip -r -q "$archive_path" "$TR_TORRENT_NAME"
     elif [ "$ext" = "tar.zst" ]; then
-        tar -c "$TR_TORRENT_NAME" | zstd -T2 -1 > "$archive_path"
+        tar -c "$TR_TORRENT_NAME" | zstd -T1 -1 > "$archive_path"
     else
         echo "[torrent-done] Unknown archive format: $ext"
         return 1
