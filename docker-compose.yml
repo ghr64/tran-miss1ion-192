@@ -17,7 +17,5 @@ services:
     volumes:
       - ./data:/data
       - ./config:/config
-    environment:
-      - SEAWEEDFS_FILER_URL=http://localhost:8888
-      - SEAWEEDFS_DEST_PATH=/downloads
-      - UPLOAD_MODE=files # Options: files (default), zip, tarzst
+    env_file:
+      - .env
